@@ -1,4 +1,0 @@
-framework module AiactivUniversalSDK {
-  header "AiactivUniversalSDK-Swift.h"
-  requires objc
-}
