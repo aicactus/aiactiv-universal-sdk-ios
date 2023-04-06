@@ -138,8 +138,9 @@ Aiactiv.screen(title: "LoginScreen", properties: properties)
 
 #### Banner Ad
 
+Create AdView with size and type is banner
+
 ```swift
-// Create AdView with size and type is banner
 let adView = AdView()
 adView.adSize = .rectangle
 adView.adType = .banner
@@ -149,6 +150,31 @@ adView.unitID = NSNumber(value: <<<Find your inventory ID in container>>>)
 self.view.addSubview(adView)
 
 // Perform loadAd with a request
+adView.loadAd(AdRequest())
+```
+
+#### Adaptive Banner Ad
+
+Create AdView in banner format with adaptive size
+
+```swift
+let adView = AdView()
+adView.adSize = .rectangle
+adView.adType = .banner
+adView.unitID = NSNumber(value: <<<Find your inventory ID in container>>>)
+
+// Add AdView to your layout
+self.view.addSubview(adView)
+```
+
+Set Banner Ad width, SDK will calculate height automatically base on Ad ratio
+In this case, we will make same width with its parent
+```swift
+adView.adaptiveSize(self.view.frame.width)
+```
+
+Perform loadAd with a request
+```swift
 adView.loadAd(AdRequest())
 ```
 
@@ -166,62 +192,16 @@ videoAdLoader.loadAd(AdRequest())
 
 ```
 
-#### Video Ad - Using Native Player to play content and Ad
-
-Define your player in layout and connect IBOutlet in your ViewController
-```swift
-@IBOutlet weak var imaPlayer: IMAPlayerView!
-```
-
-Init player
-```swift
-override func viewDidLoad() {
-    super.viewDidLoad()
-    imaPlayer.setup(contentUrl: ContentURLString)
-    imaPlayer.delegate = self
-}
-```
-
-Request Ads
-```swift
-override func viewDidAppear(_ animated: Bool) {
-    super.viewDidAppear(animated)
-    imaPlayer.requestAds(adUnitID: <<<Find your inventory ID in container>>>)
-}
-```
-
 Listen event video Ad loaded and perform playing
 
 ```swift
-extension ViewController: IMAPlayerViewDelegate {
-	func imaPlayerView(_ unitID: Int64, didFailLoad error: AdsNetworkSDKError) {
-		imaPlayer.contentPlayer.play()
-	}
-
-    func imaPlayerView(_ adsManager: ACIMAAdsManager, didReceive event: ACIMAAdEvent) {
-        if event.type == ACIMAAdEventType.LOADED {
-            adsManager.start()
-        }
+extension ViewController: VideoAdLoaderDelegate {
+	func videoAdLoader(_ unitID: Int64, vastTagURL url: String) {
+        print("Video Ad Content URL: \(url)")
     }
 
-    func imaPlayerView(_ adsManager: ACIMAAdsManager, didReceive error: ACIMAAdError) {
-        imaPlayer.contentPlayer.play()
-    }
-
-    func imaPlayerViewDidRequestContentPause(_ adsManager: ACIMAAdsManager) {
-        imaPlayer.contentPlayer.pause()
-    }
-
-    func imaPlayerViewDidRequestContentResume(_ adsManager: ACIMAAdsManager) {
-        imaPlayer.contentPlayer.play()
-    }
-
-    func imaPlayerView(_ loader: ACIMAAdsLoader, adsLoadedWith adsLoadedData: ACIMAAdsLoadedData) {
-
-    }
-
-    func imaPlayerView(_ loader: ACIMAAdsLoader, failedWith adErrorData: ACIMAAdLoadingErrorData) {
-        imaPlayer.contentPlayer.play()
+    func videoAdLoader(_ unitID: Int64, didFailLoad error: AiactivSDKError) {
+        print("Video Ad did fail to load with error: \(error.errorDescription ?? "Unknown")")
     }
 }
 ```
@@ -235,6 +215,42 @@ The first step is to lay out the UIViews that will display native ad assets. You
 Once the views are in place and you've assigned the correct ad view class to the layout, link the ad view's asset outlets to the UIViews you've created. Here's how you might link the ad view's asset outlets to the UIViews created for an ad:
 
 ![](assets/NativeAdViewBinding.png)
+
+Or you can bind your views to NativeAdView programmatically. Example:
+
+```swift
+let nativeAdView = NativeAdView()
+nativeAdView.translatesAutoresizingMaskIntoConstraints = false
+nativeAdView.backgroundColor = .systemGray
+
+self.view.addSubview(nativeAdView)
+
+let mainImageView = UIImageView(frame: .zero)
+mainImageView.backgroundColor = .gray
+mainImageView.translatesAutoresizingMaskIntoConstraints = false
+self.nativeAdView.mainImage = mainImageView
+
+let iconImageView = UIImageView(frame: .zero)
+iconImageView.backgroundColor = .gray
+iconImageView.translatesAutoresizingMaskIntoConstraints = false
+self.nativeAdView.iconImage = iconImageView
+
+let titleLabel = UILabel()
+titleLabel.text = "Native Ad Title"
+titleLabel.font = UIFont.preferredFont(forTextStyle: .headline)
+titleLabel.numberOfLines = 1
+titleLabel.lineBreakMode = .byTruncatingTail
+titleLabel.translatesAutoresizingMaskIntoConstraints = false
+self.nativeAdView.title = titleLabel
+
+let descriptionLabel = UILabel()
+descriptionLabel.text = "Native Ad Description"
+descriptionLabel.font = UIFont.preferredFont(forTextStyle: .subheadline)
+descriptionLabel.numberOfLines = 2
+descriptionLabel.lineBreakMode = .byTruncatingTail
+descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
+self.nativeAdView.desc = descriptionLabel
+```
 
 Once the layout is complete and the outlets are linked, the last step is to add code to your app that performs load an ad via `contentView`.
 
