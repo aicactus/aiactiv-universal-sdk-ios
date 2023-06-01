@@ -294,6 +294,22 @@ extension YourViewController: NativeAdViewDelegate {
 }
 ```
 
+Listen click event on NativeAd
+
+```swift
+nativeAdView.onAdClickAction = onNativeAdClicked(url:)
+
+func onNativeAdClicked(url: String) {
+    print("onNativeAdClick \(url)")
+}
+```
+
+Or invoking NativeAd onClicked whenever it's available
+
+```swift
+nativeAdView.onClicked()
+```
+
 ##### Display NativeAdTemplateView
 
 The Framework provides three types of template: Default, Medium & Article
